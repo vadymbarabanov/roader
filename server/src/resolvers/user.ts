@@ -3,14 +3,16 @@ import {
     Arg,
     Ctx,
     Field,
+    FieldResolver,
     Mutation,
     ObjectType,
     Query,
     Resolver,
+    Root,
 } from 'type-graphql'
 import argon2 from 'argon2'
 import { MyContext } from '../types'
-import { COOKIE_NAME } from '../constants'
+import { COOKIE_NAME, EMAIL_VALID_REGEX } from '../constants'
 
 @ObjectType()
 class ErrorType {
@@ -29,8 +31,16 @@ class UserResponse {
     error?: ErrorType
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+    @FieldResolver(() => String)
+    email(@Root() user: User, @Ctx() { req }: MyContext) {
+        if (req.session.userId !== user.id) {
+            return ''
+        }
+        return user.email
+    }
+
     @Query(() => User, { nullable: true })
     me(@Ctx() { req }: MyContext) {
         if (!req.session.userId) {
@@ -54,6 +64,25 @@ export class UserResolver {
             }
         }
 
+        // anystring@anystring.anystring is valid
+        if (!EMAIL_VALID_REGEX.test(email)) {
+            return {
+                error: {
+                    field: 'email',
+                    message: 'Email is invalid',
+                },
+            }
+        }
+
+        if (password.length < 4) {
+            return {
+                error: {
+                    field: 'password',
+                    message: 'Password should be at least 4 characters',
+                },
+            }
+        }
+
         const hashedPassword = await argon2.hash(password)
 
         let user: any
@@ -67,7 +96,8 @@ export class UserResolver {
                 return {
                     error: {
                         field: 'email',
-                        message: 'This email is already registered',
+                        message:
+                            'This email is already registered, try to login',
                     },
                 }
             }
