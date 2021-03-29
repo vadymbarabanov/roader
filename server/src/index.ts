@@ -1,13 +1,12 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server-express'
-import express from 'express'
-import { buildSchema } from 'type-graphql'
-import { createConnection } from 'typeorm'
-import { UserResolver } from './resolvers/user'
-import Redis from 'ioredis'
-import session from 'express-session'
 import connectRedis from 'connect-redis'
 import cors from 'cors'
+import express from 'express'
+import session from 'express-session'
+import Redis from 'ioredis'
+import 'reflect-metadata'
+import { buildSchema } from 'type-graphql'
 import {
     COOKIE_AGE,
     COOKIE_NAME,
@@ -16,9 +15,11 @@ import {
     SESSION_SECRET,
     __prod__,
 } from './constants'
+import { UserResolver } from './resolvers/user'
+import { createTypeormConn } from './utils/createTypeormConn'
 
 const main = async () => {
-    await createConnection()
+    await createTypeormConn()
 
     const app = express()
 

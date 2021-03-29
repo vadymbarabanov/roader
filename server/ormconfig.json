@@ -1,16 +1,37 @@
-{
-    "type": "postgres",
-    "host": "localhost",
-    "port": 5432,
-    "username": "postgres",
-    "password": "1404",
-    "database": "roader",
-    "synchronize": true,
-    "logging": true,
-    "entities": ["dist/entities/**/*.js"],
-    "migrations": ["dist/migrations/**/*.js"],
-    "cli": {
-        "entitiesDir": "dist/entities",
-        "migrationsDir": "dist/migrations"
+[
+    {
+        "name": "development",
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "postgres",
+        "password": "1404",
+        "database": "roader",
+        "synchronize": true,
+        "logging": true,
+        "entities": ["dist/entities/**/*.js"],
+        "migrations": ["dist/migrations/**/*.js"],
+        "cli": {
+            "entitiesDir": "dist/entities",
+            "migrationsDir": "dist/migrations"
+        }
+    },
+    {
+        "name": "test",
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "postgres",
+        "password": "1404",
+        "database": "roader_test",
+        "synchronize": true,
+        "logging": false,
+        "dropSchema": true,
+        "entities": ["src/entities/**/*.ts"],
+        "migrations": ["src/migrations/**/*.ts"],
+        "cli": {
+            "entitiesDir": "src/entities",
+            "migrationsDir": "src/migrations"
+        }
     }
-}
+]

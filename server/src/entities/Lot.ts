@@ -4,28 +4,34 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    OneToMany,
+    ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm'
-import { Lot } from './Lot'
+import { User } from './User'
 
 @ObjectType()
 @Entity()
-export class User extends BaseEntity {
+export class Lot extends BaseEntity {
     @Field()
     @PrimaryGeneratedColumn()
-    id!: number
+    id: number
 
     @Field(() => String)
-    @Column('varchar', { length: 255, unique: true })
-    email!: string
-
     @Column('text')
-    password!: string
+    title: string
 
-    @OneToMany(() => Lot, (lot) => lot.creator)
-    lots: Lot[]
+    @Field(() => String)
+    @Column('text')
+    description: string
+
+    @Field()
+    @Column('int')
+    creator_id: number
+
+    @Field(() => User)
+    @ManyToOne(() => User, (user) => user.lots)
+    creator: User
 
     @CreateDateColumn()
     created_at!: Date
