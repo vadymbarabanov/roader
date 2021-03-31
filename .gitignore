@@ -1,6 +1,7 @@
 server/dist
 **/node_modules
 **/**/.env
+**/**/.idea
 
 # dependencies
 client/.pnp
