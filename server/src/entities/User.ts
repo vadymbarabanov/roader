@@ -19,6 +19,10 @@ export class User extends BaseEntity {
 
     @Field(() => String)
     @Column('varchar', { length: 255, unique: true })
+    username!: string
+
+    @Field(() => String)
+    @Column('varchar', { length: 255, unique: true })
     email!: string
 
     @Column('text')
@@ -27,9 +31,11 @@ export class User extends BaseEntity {
     @OneToMany(() => Lot, (lot) => lot.creator)
     lots: Lot[]
 
+    @Field()
     @CreateDateColumn()
-    created_at!: Date
+    createdAt!: Date
 
+    @Field()
     @UpdateDateColumn()
-    updated_at!: Date
+    updatedAt!: Date
 }

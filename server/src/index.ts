@@ -17,6 +17,8 @@ import {
 } from './constants'
 import { UserResolver } from './resolvers/user'
 import { createTypeormConn } from './utils/createTypeormConn'
+import { LotResolver } from './resolvers/lot'
+import { createUserLoader } from './utils/createUserLoader'
 
 const main = async () => {
     await createTypeormConn()
@@ -48,12 +50,13 @@ const main = async () => {
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver],
+            resolvers: [UserResolver, LotResolver],
             validate: false,
         }),
         context: ({ req, res }) => ({
             req,
             res,
+            userLoader: createUserLoader(),
         }),
     })
 

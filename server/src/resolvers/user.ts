@@ -18,6 +18,7 @@ import { COOKIE_NAME, EMAIL_VALID_REGEX } from '../constants'
 class ErrorType {
     @Field()
     field!: string
+
     @Field()
     message!: string
 }
@@ -51,6 +52,7 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async register(
+        @Arg('username') username: string,
         @Arg('email') email: string,
         @Arg('password') password: string,
         @Ctx() { req }: MyContext
@@ -83,11 +85,21 @@ export class UserResolver {
             }
         }
 
+        if (username.length < 3) {
+            return {
+                error: {
+                    field: 'username',
+                    message: 'Username should be at least 3 characters',
+                },
+            }
+        }
+
         const hashedPassword = await argon2.hash(password)
 
         let user: any
         try {
             user = await User.create({
+                username,
                 email,
                 password: hashedPassword,
             }).save()
@@ -110,11 +122,11 @@ export class UserResolver {
 
     @Mutation(() => UserResponse)
     async login(
-        @Arg('email') email: string,
+        @Arg('usernameOrEmail') usernameOrEmail: string,
         @Arg('password') password: string,
         @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
-        if (!email || !password) {
+        if (!usernameOrEmail || !password) {
             return {
                 error: {
                     field: 'common',
@@ -123,13 +135,17 @@ export class UserResolver {
             }
         }
 
-        const user = await User.findOne({ where: { email } })
+        const user = await User.findOne(
+            EMAIL_VALID_REGEX.test(usernameOrEmail)
+                ? { where: { email: usernameOrEmail } }
+                : { where: { username: usernameOrEmail } }
+        )
 
         if (!user) {
             return {
                 error: {
-                    field: 'email',
-                    message: 'This email is not registred',
+                    field: 'usernameOrEmail',
+                    message: 'This user does not exist',
                 },
             }
         }

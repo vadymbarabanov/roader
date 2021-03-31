@@ -15,27 +15,29 @@ import { User } from './User'
 export class Lot extends BaseEntity {
     @Field()
     @PrimaryGeneratedColumn()
-    id: number
+    id!: number
 
     @Field(() => String)
     @Column('text')
-    title: string
+    title!: string
 
     @Field(() => String)
     @Column('text')
-    description: string
+    description!: string
 
     @Field()
     @Column('int')
-    creator_id: number
+    creatorId!: number
 
     @Field(() => User)
     @ManyToOne(() => User, (user) => user.lots)
     creator: User
 
+    @Field()
     @CreateDateColumn()
-    created_at!: Date
+    createdAt!: Date
 
+    @Field()
     @UpdateDateColumn()
-    updated_at!: Date
+    updatedAt!: Date
 }
