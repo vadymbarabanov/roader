@@ -12,7 +12,13 @@ import {
 } from 'type-graphql'
 import argon2 from 'argon2'
 import { ErrorType, MyContext } from '../types'
-import { COOKIE_NAME, EMAIL_VALID_REGEX } from '../constants'
+import {
+    COOKIE_NAME,
+    EMAIL_VALID_REGEX,
+    FORGOT_PASSWORD_PREFIX,
+} from '../constants'
+import { v4 } from 'uuid'
+import { sendEmail } from '../utils/sendEmail'
 
 @ObjectType()
 class UserResponse {
@@ -39,6 +45,79 @@ export class UserResolver {
             return null
         }
         return User.findOne(req.session.userId)
+    }
+
+    @Mutation(() => UserResponse)
+    async changePassword(
+        @Arg('token') token: string,
+        @Arg('newPassword') newPassword: string,
+        @Ctx() { redis, req }: MyContext
+    ): Promise<UserResponse> {
+        if (newPassword.length <= 2) {
+            return {
+                error: {
+                    field: 'newPassword',
+                    message: 'length must be greater than 2',
+                },
+            }
+        }
+        const key = FORGOT_PASSWORD_PREFIX + token
+        const userId = await redis.get(key)
+        if (!userId) {
+            return {
+                error: { field: 'token', message: 'Token expired' },
+            }
+        }
+
+        const userIdNum = parseInt(userId)
+        const user = await User.findOne(userIdNum)
+
+        if (!user) {
+            return {
+                error: { field: 'token', message: 'User no longer exists' },
+            }
+        }
+
+        await User.update(
+            { id: userIdNum },
+            { password: await argon2.hash(newPassword) }
+        )
+
+        await redis.del(key)
+
+        // log in user after change password
+        req.session.userId = user.id
+
+        return { user }
+    }
+
+    @Mutation(() => Boolean)
+    async forgotPassword(
+        @Arg('email') email: string,
+        @Ctx() { redis }: MyContext
+    ) {
+        const user = await User.findOne({ where: { email } })
+        if (!user) {
+            // email is not in the db
+            // do nothing security reasons
+            return true
+        }
+
+        const token = v4()
+
+        await redis.set(
+            FORGOT_PASSWORD_PREFIX + token,
+            user.id,
+            'ex',
+            1000 * 60 * 60 * 24 * 3 // 3 days
+        )
+
+        await sendEmail(
+            user.email,
+            'Change password',
+            `<a href="http://localhost:3000/change-password/${token}">Reset password</a>`
+        )
+        return true
     }
 
     @Mutation(() => UserResponse)

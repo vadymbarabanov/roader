@@ -5,6 +5,7 @@ export const COOKIE_NAME = 'qid'
 export const COOKIE_AGE = 1000 * 60 * 60 * 24 * 365 // one year
 export const SESSION_SECRET = 'Thequickbrownfoxjumpsoverthelazydog'
 export const EMAIL_VALID_REGEX = /^\S+@\S+\.\S+$/
+export const FORGOT_PASSWORD_PREFIX = 'forgot-password:'
 
 // host for jest
 export const HOST = 'http://localhost:4000/graphql'

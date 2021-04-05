@@ -56,6 +56,7 @@ const main = async () => {
         context: ({ req, res }) => ({
             req,
             res,
+            redis,
             userLoader: createUserLoader(),
         }),
     })
