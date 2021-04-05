@@ -11,17 +11,8 @@ import {
     Root,
 } from 'type-graphql'
 import argon2 from 'argon2'
-import { MyContext } from '../types'
+import { ErrorType, MyContext } from '../types'
 import { COOKIE_NAME, EMAIL_VALID_REGEX } from '../constants'
-
-@ObjectType()
-class ErrorType {
-    @Field()
-    field!: string
-
-    @Field()
-    message!: string
-}
 
 @ObjectType()
 class UserResponse {

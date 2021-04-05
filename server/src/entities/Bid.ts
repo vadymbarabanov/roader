@@ -1,43 +1,46 @@
-import { Field, Int, ObjectType } from 'type-graphql'
+import { Field, Float, Int, ObjectType } from 'type-graphql'
 import {
     BaseEntity,
     Column,
     CreateDateColumn,
     Entity,
     ManyToOne,
-    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm'
-import { Bid } from './Bid'
+import { Lot } from './Lot'
 import { User } from './User'
 
 @ObjectType()
 @Entity()
-export class Lot extends BaseEntity {
-    @Field(() => Int)
+export class Bid extends BaseEntity {
+    @Field()
     @PrimaryGeneratedColumn()
     id!: number
 
-    @Field(() => String)
-    @Column('text')
-    title!: string
+    @Field(() => Float)
+    @Column('float')
+    amount!: number
 
     @Field(() => String)
-    @Column('text')
-    description!: string
+    @Column('text', { default: '' })
+    comment: string
 
-    @Field()
+    @Field(() => Int)
     @Column('int')
     creatorId!: number
 
-    @Field(() => [Bid])
-    @OneToMany(() => Bid, (bid) => bid.creator)
-    bids: Bid[]
+    @Field(() => Int)
+    @Column('int')
+    lotId!: number
 
     @Field(() => User)
-    @ManyToOne(() => User, (user) => user.lots)
+    @ManyToOne(() => User, (user) => user.bids)
     creator: User
+
+    @Field(() => Lot)
+    @ManyToOne(() => Lot, (lot) => lot.bids)
+    lot: Lot
 
     @Field()
     @CreateDateColumn()

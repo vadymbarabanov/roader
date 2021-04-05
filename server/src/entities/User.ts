@@ -8,6 +8,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm'
+import { Bid } from './Bid'
 import { Lot } from './Lot'
 
 @ObjectType()
@@ -30,6 +31,9 @@ export class User extends BaseEntity {
 
     @OneToMany(() => Lot, (lot) => lot.creator)
     lots: Lot[]
+
+    @OneToMany(() => Bid, (bid) => bid.creator)
+    bids: Bid[]
 
     @Field()
     @CreateDateColumn()

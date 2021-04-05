@@ -27,14 +27,19 @@ class LotInput {
 
 @Resolver(Lot)
 export class LotResolver {
+    @FieldResolver(() => String)
+    descriptionSnippet(@Root() root: Lot) {
+        return root.description.slice(0, 50)
+    }
+
     @FieldResolver(() => User)
     creator(@Root() lot: Lot, @Ctx() { userLoader }: MyContext) {
         return userLoader.load(lot.creatorId)
     }
 
     @Query(() => Lot, { nullable: true })
-    lot(@Arg('id', () => Int) id: number): Promise<Lot | undefined> {
-        return Lot.findOne(id)
+    async lot(@Arg('id', () => Int) id: number): Promise<Lot | undefined> {
+        return await Lot.findOne(id)
     }
 
     @Query(() => [Lot])

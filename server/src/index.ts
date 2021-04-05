@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server-express'
 import connectRedis from 'connect-redis'
 import cors from 'cors'
@@ -15,9 +14,10 @@ import {
     SESSION_SECRET,
     __prod__,
 } from './constants'
+import { BidResolver } from './resolvers/bid'
+import { LotResolver } from './resolvers/lot'
 import { UserResolver } from './resolvers/user'
 import { createTypeormConn } from './utils/createTypeormConn'
-import { LotResolver } from './resolvers/lot'
 import { createUserLoader } from './utils/createUserLoader'
 
 const main = async () => {
@@ -50,7 +50,7 @@ const main = async () => {
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver, LotResolver],
+            resolvers: [UserResolver, LotResolver, BidResolver],
             validate: false,
         }),
         context: ({ req, res }) => ({
