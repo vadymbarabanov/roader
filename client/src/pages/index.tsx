@@ -1,9 +1,12 @@
 import React from 'react'
+import { Layout } from 'src/components/Layout'
 
-const Index = () => (
-    <div>
-        <h1>Hi world!</h1>
-    </div>
-)
+const Index = () => {
+    return (
+        <Layout>
+            <div>Some text</div>
+        </Layout>
+    )
+}
 
 export default Index
