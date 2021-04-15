@@ -8,14 +8,7 @@ import Redis from 'ioredis'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { createConnection } from 'typeorm'
-import {
-    COOKIE_AGE,
-    COOKIE_NAME,
-    CORS_ORIGIN,
-    PORT,
-    SESSION_SECRET,
-    __prod__,
-} from './constants'
+import { COOKIE_AGE, COOKIE_NAME, CORS_ORIGIN, __prod__ } from './constants'
 import { BidResolver } from './resolvers/bid'
 import { LotResolver } from './resolvers/lot'
 import { UserResolver } from './resolvers/user'
@@ -24,9 +17,6 @@ import { createUserLoader } from './utils/createUserLoader'
 const main = async () => {
     await createConnection({
         type: 'postgres',
-        // username: 'postgres',
-        // password: '1404',
-        // database: 'roader',
         url: process.env.DATABASE_URL,
         synchronize: true,
         logging: true,
@@ -41,7 +31,7 @@ const main = async () => {
     const app = express()
 
     const RedisStore = connectRedis(session)
-    const redis = new Redis()
+    const redis = new Redis(process.env.REDIS_URL)
 
     app.use(cors({ origin: CORS_ORIGIN, credentials: true }))
     app.use(
@@ -57,7 +47,7 @@ const main = async () => {
                 secure: __prod__, // cookie only works in https
                 sameSite: 'lax', // csrf
             },
-            secret: SESSION_SECRET,
+            secret: process.env.SESSION_SECRET as string,
             resave: false,
             saveUninitialized: false,
         })
@@ -81,8 +71,8 @@ const main = async () => {
         cors: false,
     })
 
-    app.listen(PORT, () => {
-        console.log(`Server started on localhost:${PORT}`)
+    app.listen(process.env.PORT, () => {
+        console.log(`Server started on localhost:${process.env.PORT}`)
     })
 }
 
