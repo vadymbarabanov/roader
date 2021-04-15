@@ -1,3 +1,4 @@
+import 'dotenv-safe/config'
 import { ApolloServer } from 'apollo-server-express'
 import connectRedis from 'connect-redis'
 import cors from 'cors'
@@ -6,6 +7,7 @@ import session from 'express-session'
 import Redis from 'ioredis'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
+import { createConnection } from 'typeorm'
 import {
     COOKIE_AGE,
     COOKIE_NAME,
@@ -17,11 +19,24 @@ import {
 import { BidResolver } from './resolvers/bid'
 import { LotResolver } from './resolvers/lot'
 import { UserResolver } from './resolvers/user'
-import { createTypeormConn } from './utils/createTypeormConn'
 import { createUserLoader } from './utils/createUserLoader'
 
 const main = async () => {
-    await createTypeormConn()
+    await createConnection({
+        type: 'postgres',
+        // username: 'postgres',
+        // password: '1404',
+        // database: 'roader',
+        url: process.env.DATABASE_URL,
+        synchronize: true,
+        logging: true,
+        entities: ['dist/entities/**/*.js'],
+        migrations: ['dist/migrations/**/*.js'],
+        cli: {
+            entitiesDir: 'dist/entities',
+            migrationsDir: 'dist/migrations',
+        },
+    })
 
     const app = express()
 
