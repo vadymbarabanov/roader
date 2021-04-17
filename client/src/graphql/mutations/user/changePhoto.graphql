@@ -1,0 +1,3 @@
+mutation ChangePhoto($photoUrl: String!) {
+    changePhoto(photoUrl: $photoUrl)
+}

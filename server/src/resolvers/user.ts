@@ -9,6 +9,7 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql'
 import argon2 from 'argon2'
 import { ErrorType, MyContext } from '../types'
@@ -19,6 +20,7 @@ import {
 } from '../constants'
 import { v4 } from 'uuid'
 import { sendEmail } from '../utils/sendEmail'
+import { isAuth } from '../middleware/isAuth'
 
 @ObjectType()
 class UserResponse {
@@ -252,5 +254,18 @@ export class UserResolver {
                 resolve(true)
             })
         )
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuth)
+    async changePhoto(
+        @Arg('photoUrl') photoUrl: string,
+        @Ctx() { req }: MyContext
+    ): Promise<boolean> {
+        if (!photoUrl) {
+            return false
+        }
+        await User.update({ id: req.session.userId }, { photoUrl })
+        return true
     }
 }

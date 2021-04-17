@@ -29,6 +29,10 @@ export class User extends BaseEntity {
     @Column('text')
     password!: string
 
+    @Field(() => String, { nullable: true })
+    @Column('varchar', { length: 255, nullable: true })
+    photoUrl: string
+
     @OneToMany(() => Lot, (lot) => lot.creator)
     lots: Lot[]
 

@@ -69,6 +69,7 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
+  changePhoto: Scalars['Boolean'];
 };
 
 
@@ -107,11 +108,17 @@ export type MutationLoginArgs = {
   usernameOrEmail: Scalars['String'];
 };
 
+
+export type MutationChangePhotoArgs = {
+  photoUrl: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   bid?: Maybe<Bid>;
   bids: Array<Bid>;
   lot?: Maybe<Lot>;
+  mylots: Array<Lot>;
   lots: Array<Lot>;
   me?: Maybe<User>;
 };
@@ -136,6 +143,7 @@ export type User = {
   id: Scalars['Float'];
   username: Scalars['String'];
   email: Scalars['String'];
+  photoUrl?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
 };
@@ -210,6 +218,16 @@ export type RegisterMutation = (
   ) }
 );
 
+export type ChangePhotoMutationVariables = Exact<{
+  photoUrl: Scalars['String'];
+}>;
+
+
+export type ChangePhotoMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'changePhoto'>
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -217,7 +235,7 @@ export type MeQuery = (
   { __typename?: 'Query' }
   & { me?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'email' | 'username'>
+    & Pick<User, 'email' | 'username' | 'photoUrl'>
   )> }
 );
 
@@ -374,11 +392,43 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const ChangePhotoDocument = gql`
+    mutation ChangePhoto($photoUrl: String!) {
+  changePhoto(photoUrl: $photoUrl)
+}
+    `;
+export type ChangePhotoMutationFn = Apollo.MutationFunction<ChangePhotoMutation, ChangePhotoMutationVariables>;
+
+/**
+ * __useChangePhotoMutation__
+ *
+ * To run a mutation, you first call `useChangePhotoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePhotoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePhotoMutation, { data, loading, error }] = useChangePhotoMutation({
+ *   variables: {
+ *      photoUrl: // value for 'photoUrl'
+ *   },
+ * });
+ */
+export function useChangePhotoMutation(baseOptions?: Apollo.MutationHookOptions<ChangePhotoMutation, ChangePhotoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangePhotoMutation, ChangePhotoMutationVariables>(ChangePhotoDocument, options);
+      }
+export type ChangePhotoMutationHookResult = ReturnType<typeof useChangePhotoMutation>;
+export type ChangePhotoMutationResult = Apollo.MutationResult<ChangePhotoMutation>;
+export type ChangePhotoMutationOptions = Apollo.BaseMutationOptions<ChangePhotoMutation, ChangePhotoMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
     email
     username
+    photoUrl
   }
 }
     `;

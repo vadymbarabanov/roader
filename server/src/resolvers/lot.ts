@@ -43,6 +43,12 @@ export class LotResolver {
     }
 
     @Query(() => [Lot])
+    @UseMiddleware(isAuth)
+    async mylots(@Ctx() { req }: MyContext) {
+        return await Lot.find({ where: { id: req.session.userId } })
+    }
+
+    @Query(() => [Lot])
     async lots() {
         return await Lot.find()
     }

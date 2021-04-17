@@ -1,17 +1,31 @@
-import { Flex, Link, Heading, Box, Button, Text } from '@chakra-ui/react'
+import {
+    Flex,
+    Link,
+    Heading,
+    Box,
+    Button,
+    Text,
+    Menu,
+    MenuButton,
+    MenuDivider,
+    MenuGroup,
+    MenuItem,
+    MenuList,
+} from '@chakra-ui/react'
 import React from 'react'
 import NextLink from 'next/link'
 import { bgPrimary, btnPrimary, btnSecondary } from '../constants/colors'
 import { useLogoutMutation, useMeQuery } from 'src/generated/graphql'
 import { useRouter } from 'next/router'
+import { InfoIcon } from '@chakra-ui/icons'
 
 export const NavBar: React.FC = () => {
     const router = useRouter()
     const [logout] = useLogoutMutation()
-    const { data } = useMeQuery()
+    const { data, loading } = useMeQuery()
 
     let body: any
-    if (!data?.me) {
+    if (!data?.me && !loading) {
         body = (
             <Flex>
                 <NextLink href="/login">
@@ -24,20 +38,35 @@ export const NavBar: React.FC = () => {
                 </NextLink>
             </Flex>
         )
-    } else {
+    } else if (data && data.me) {
         body = (
             <Flex align="center">
-                <Text fontWeight="semibold" mr={4}>
-                    {data.me.username}
-                </Text>
-                <Button
-                    size="sm"
-                    onClick={async () => {
-                        await logout()
-                        router.push('/login')
-                    }}>
-                    Logout
-                </Button>
+                <Menu>
+                    <MenuButton size="sm" as={Button}>
+                        {data.me.username}
+                    </MenuButton>
+                    <MenuList>
+                        <MenuGroup>
+                            <MenuItem>
+                                <NextLink href="/profile">Profile</NextLink>
+                            </MenuItem>
+                            <MenuItem>
+                                <NextLink href="/profile/settings">
+                                    Settings
+                                </NextLink>
+                            </MenuItem>
+                            <MenuDivider />
+                            <MenuItem
+                                size="sm"
+                                onClick={async () => {
+                                    await logout()
+                                    router.push('/login')
+                                }}>
+                                Logout
+                            </MenuItem>
+                        </MenuGroup>
+                    </MenuList>
+                </Menu>
             </Flex>
         )
     }
