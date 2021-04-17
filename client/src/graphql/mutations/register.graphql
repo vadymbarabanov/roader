@@ -4,7 +4,7 @@ mutation Register($username: String!, $email: String!, $password: String!) {
             email
             username
         }
-        error {
+        errors {
             field
             message
         }

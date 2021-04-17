@@ -1,0 +1,10 @@
+query Lots {
+    lots {
+        id
+        title
+        descriptionSnippet
+        creator {
+            username
+        }
+    }
+}

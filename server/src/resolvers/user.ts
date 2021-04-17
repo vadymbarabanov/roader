@@ -25,8 +25,8 @@ class UserResponse {
     @Field(() => User, { nullable: true })
     user?: User
 
-    @Field(() => ErrorType, { nullable: true })
-    error?: ErrorType
+    @Field(() => [ErrorType], { nullable: true })
+    errors?: ErrorType[]
 }
 
 @Resolver(User)
@@ -55,17 +55,19 @@ export class UserResolver {
     ): Promise<UserResponse> {
         if (newPassword.length <= 2) {
             return {
-                error: {
-                    field: 'newPassword',
-                    message: 'length must be greater than 2',
-                },
+                errors: [
+                    {
+                        field: 'newPassword',
+                        message: 'length must be greater than 2',
+                    },
+                ],
             }
         }
         const key = FORGOT_PASSWORD_PREFIX + token
         const userId = await redis.get(key)
         if (!userId) {
             return {
-                error: { field: 'token', message: 'Token expired' },
+                errors: [{ field: 'token', message: 'Token expired' }],
             }
         }
 
@@ -74,7 +76,7 @@ export class UserResolver {
 
         if (!user) {
             return {
-                error: { field: 'token', message: 'User no longer exists' },
+                errors: [{ field: 'token', message: 'User no longer exists' }],
             }
         }
 
@@ -127,42 +129,29 @@ export class UserResolver {
         @Arg('password') password: string,
         @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
-        if (!email || !password) {
-            return {
-                error: {
-                    field: 'common',
-                    message: 'Email or (and) Password are invalid',
-                },
-            }
+        let errors: ErrorType[] = []
+        if (username.length < 3) {
+            errors.push({
+                field: 'username',
+                message: 'Username should be at least 3 characters',
+            })
         }
 
-        // anystring@anystring.anystring is valid
         if (!EMAIL_VALID_REGEX.test(email)) {
-            return {
-                error: {
-                    field: 'email',
-                    message: 'Email is invalid',
-                },
-            }
+            errors.push({
+                field: 'email',
+                message: 'Email is invalid',
+            })
         }
 
         if (password.length < 4) {
-            return {
-                error: {
-                    field: 'password',
-                    message: 'Password should be at least 4 characters',
-                },
-            }
+            errors.push({
+                field: 'password',
+                message: 'Password should be at least 4 characters',
+            })
         }
 
-        if (username.length < 3) {
-            return {
-                error: {
-                    field: 'username',
-                    message: 'Username should be at least 3 characters',
-                },
-            }
-        }
+        if (errors.length > 0) return { errors }
 
         const hashedPassword = await argon2.hash(password)
 
@@ -176,11 +165,13 @@ export class UserResolver {
         } catch (err) {
             if (err.code === '23505') {
                 return {
-                    error: {
-                        field: 'email',
-                        message:
-                            'This email is already registered, try to login',
-                    },
+                    errors: [
+                        {
+                            field: 'email',
+                            message:
+                                'This email is already registered, try to login',
+                        },
+                    ],
                 }
             }
         }
@@ -196,14 +187,23 @@ export class UserResolver {
         @Arg('password') password: string,
         @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
-        if (!usernameOrEmail || !password) {
-            return {
-                error: {
-                    field: 'common',
-                    message: 'Email or (and) Password are invalid',
-                },
-            }
+        let errors: ErrorType[] = []
+
+        if (!usernameOrEmail) {
+            errors.push({
+                field: 'usernameOrEmail',
+                message: "Username or Email shouldn't be empty",
+            })
         }
+
+        if (!password) {
+            errors.push({
+                field: 'password',
+                message: "Password shouldn't be empty",
+            })
+        }
+
+        if (errors.length > 0) return { errors }
 
         const user = await User.findOne(
             EMAIL_VALID_REGEX.test(usernameOrEmail)
@@ -213,10 +213,12 @@ export class UserResolver {
 
         if (!user) {
             return {
-                error: {
-                    field: 'usernameOrEmail',
-                    message: 'This user does not exist',
-                },
+                errors: [
+                    {
+                        field: 'usernameOrEmail',
+                        message: 'This user does not exist',
+                    },
+                ],
             }
         }
 
@@ -224,10 +226,12 @@ export class UserResolver {
 
         if (!valid) {
             return {
-                error: {
-                    field: 'common',
-                    message: 'Email or (and) Password are incorrect',
-                },
+                errors: [
+                    {
+                        field: 'password',
+                        message: 'Password is incorrect',
+                    },
+                ],
             }
         }
 

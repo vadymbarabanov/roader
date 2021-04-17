@@ -4,7 +4,7 @@ import Wrapper, { WrapperVariant } from './Wrapper'
 
 export const Layout: React.FC<{ variant?: WrapperVariant }> = ({
     children,
-    variant = 'md',
+    variant = 'lg',
 }) => {
     return (
         <>
