@@ -1,29 +1,31 @@
-import { Box, Button, Heading, useToast } from '@chakra-ui/react'
+import { Box, Button, Heading, useToast, Text } from '@chakra-ui/react'
 import { Formik, Form } from 'formik'
 import React from 'react'
 import InputField from 'src/components/InputField'
 import { Layout } from 'src/components/Layout'
 import { btnPrimary } from 'src/constants/colors'
-import { useChangePhotoMutation } from 'src/generated/graphql'
+import { useMeQuery, useUdpateProfileMutation } from 'src/generated/graphql'
 
 const Settings: React.FC<{}> = () => {
-    const [changePhoto] = useChangePhotoMutation()
+    const { data, loading, error } = useMeQuery()
+    const [updateProfile] = useUdpateProfileMutation()
     const toast = useToast()
 
-    return (
-        <Layout>
-            <Heading mb={4}>Settings</Heading>
-
+    let body: any
+    if (!data && !loading && error) {
+        body = <Text>{error.message}</Text>
+    } else {
+        body = (
             <Formik
-                initialValues={{ photoUrl: '' }}
+                initialValues={{ photoUrl: '', phoneNumber: '' }}
                 onSubmit={async (values, { resetForm }) => {
-                    const response = await changePhoto({
-                        variables: { photoUrl: values.photoUrl },
+                    const response = await updateProfile({
+                        variables: { input: values },
                     })
 
-                    if (response.data?.changePhoto.valueOf()) {
+                    if (response.data?.updateProfile.valueOf()) {
                         toast({
-                            title: 'Successfully changed!',
+                            title: 'Profile updated!',
                             status: 'success',
                             duration: 2000,
                             isClosable: true,
@@ -33,7 +35,7 @@ const Settings: React.FC<{}> = () => {
                         resetForm()
                     } else {
                         toast({
-                            title: 'Something wrong :c',
+                            title: 'Something goes wrong :c',
                             status: 'error',
                             duration: 2000,
                             isClosable: true,
@@ -43,11 +45,19 @@ const Settings: React.FC<{}> = () => {
                 }}>
                 {({ isSubmitting }) => (
                     <Form>
-                        <Box maxW="lg">
+                        <Box maxW="md">
+                            <Box mb={4}>
+                                <InputField
+                                    name="photoUrl"
+                                    label="Photo URL"
+                                    placeholder="https://photo.com/me"
+                                />
+                            </Box>
                             <InputField
-                                name="photoUrl"
-                                label="Photo URL"
-                                placeholder="https://photo.com/me"
+                                type="tel"
+                                name="phoneNumber"
+                                label="Phone Number"
+                                placeholder="+380631234567"
                             />
                         </Box>
                         <Button
@@ -55,11 +65,18 @@ const Settings: React.FC<{}> = () => {
                             isLoading={isSubmitting}
                             type="submit"
                             colorScheme={btnPrimary}>
-                            Change Photo
+                            Save
                         </Button>
                     </Form>
                 )}
             </Formik>
+        )
+    }
+
+    return (
+        <Layout>
+            <Heading mb={4}>Settings</Heading>
+            {body}
         </Layout>
     )
 }

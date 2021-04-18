@@ -4,20 +4,20 @@ import {
     Heading,
     Box,
     Button,
-    Text,
     Menu,
     MenuButton,
     MenuDivider,
     MenuGroup,
     MenuItem,
     MenuList,
+    IconButton,
+    Image,
 } from '@chakra-ui/react'
 import React from 'react'
 import NextLink from 'next/link'
 import { bgPrimary, btnPrimary, btnSecondary } from '../constants/colors'
 import { useLogoutMutation, useMeQuery } from 'src/generated/graphql'
 import { useRouter } from 'next/router'
-import { InfoIcon } from '@chakra-ui/icons'
 
 export const NavBar: React.FC = () => {
     const router = useRouter()
@@ -43,18 +43,16 @@ export const NavBar: React.FC = () => {
             <Flex align="center">
                 <Menu>
                     <MenuButton size="sm" as={Button}>
-                        {data.me.username}
+                        {data.me.username.slice(0, 1).toUpperCase()}
                     </MenuButton>
                     <MenuList>
                         <MenuGroup>
-                            <MenuItem>
-                                <NextLink href="/profile">Profile</NextLink>
-                            </MenuItem>
-                            <MenuItem>
-                                <NextLink href="/profile/settings">
-                                    Settings
-                                </NextLink>
-                            </MenuItem>
+                            <NextLink href="/profile">
+                                <MenuItem>Profile</MenuItem>
+                            </NextLink>
+                            <NextLink href="/profile/settings">
+                                <MenuItem>Settings</MenuItem>
+                            </NextLink>
                             <MenuDivider />
                             <MenuItem
                                 size="sm"

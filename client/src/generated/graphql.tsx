@@ -48,6 +48,7 @@ export type Lot = {
   title: Scalars['String'];
   description: Scalars['String'];
   creatorId: Scalars['Float'];
+  highestBid?: Maybe<Scalars['Float']>;
   bids: Array<Bid>;
   creator: User;
   createdAt: Scalars['DateTime'];
@@ -69,7 +70,7 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
-  changePhoto: Scalars['Boolean'];
+  updateProfile: Scalars['Boolean'];
 };
 
 
@@ -109,18 +110,24 @@ export type MutationLoginArgs = {
 };
 
 
-export type MutationChangePhotoArgs = {
-  photoUrl: Scalars['String'];
+export type MutationUpdateProfileArgs = {
+  input: ProfileInput;
+};
+
+export type ProfileInput = {
+  photoUrl?: Maybe<Scalars['String']>;
+  phoneNumber?: Maybe<Scalars['String']>;
 };
 
 export type Query = {
   __typename?: 'Query';
   bid?: Maybe<Bid>;
   bids: Array<Bid>;
-  lot?: Maybe<Lot>;
+  getLot?: Maybe<Lot>;
   mylots: Array<Lot>;
   lots: Array<Lot>;
   me?: Maybe<User>;
+  getProfile: User;
 };
 
 
@@ -134,8 +141,13 @@ export type QueryBidsArgs = {
 };
 
 
-export type QueryLotArgs = {
+export type QueryGetLotArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryGetProfileArgs = {
+  username: Scalars['String'];
 };
 
 export type User = {
@@ -144,6 +156,7 @@ export type User = {
   username: Scalars['String'];
   email: Scalars['String'];
   photoUrl?: Maybe<Scalars['String']>;
+  phoneNumber?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
 };
@@ -189,7 +202,7 @@ export type LotsQuery = (
   { __typename?: 'Query' }
   & { lots: Array<(
     { __typename?: 'Lot' }
-    & Pick<Lot, 'id' | 'title' | 'descriptionSnippet'>
+    & Pick<Lot, 'id' | 'title' | 'highestBid' | 'descriptionSnippet'>
     & { creator: (
       { __typename?: 'User' }
       & Pick<User, 'username'>
@@ -218,14 +231,31 @@ export type RegisterMutation = (
   ) }
 );
 
-export type ChangePhotoMutationVariables = Exact<{
-  photoUrl: Scalars['String'];
+export type UdpateProfileMutationVariables = Exact<{
+  input: ProfileInput;
 }>;
 
 
-export type ChangePhotoMutation = (
+export type UdpateProfileMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'changePhoto'>
+  & Pick<Mutation, 'updateProfile'>
+);
+
+export type GetLotQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type GetLotQuery = (
+  { __typename?: 'Query' }
+  & { getLot?: Maybe<(
+    { __typename?: 'Lot' }
+    & Pick<Lot, 'title' | 'description' | 'createdAt'>
+    & { creator: (
+      { __typename?: 'User' }
+      & Pick<User, 'username' | 'photoUrl' | 'phoneNumber'>
+    ) }
+  )> }
 );
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
@@ -235,8 +265,21 @@ export type MeQuery = (
   { __typename?: 'Query' }
   & { me?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'email' | 'username' | 'photoUrl'>
+    & Pick<User, 'email' | 'username' | 'photoUrl' | 'phoneNumber'>
   )> }
+);
+
+export type GetProfileQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type GetProfileQuery = (
+  { __typename?: 'Query' }
+  & { getProfile: (
+    { __typename?: 'User' }
+    & Pick<User, 'username' | 'email' | 'photoUrl' | 'phoneNumber'>
+  ) }
 );
 
 
@@ -316,6 +359,7 @@ export const LotsDocument = gql`
   lots {
     id
     title
+    highestBid
     descriptionSnippet
     creator {
       username
@@ -392,43 +436,86 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
-export const ChangePhotoDocument = gql`
-    mutation ChangePhoto($photoUrl: String!) {
-  changePhoto(photoUrl: $photoUrl)
+export const UdpateProfileDocument = gql`
+    mutation UdpateProfile($input: ProfileInput!) {
+  updateProfile(input: $input)
 }
     `;
-export type ChangePhotoMutationFn = Apollo.MutationFunction<ChangePhotoMutation, ChangePhotoMutationVariables>;
+export type UdpateProfileMutationFn = Apollo.MutationFunction<UdpateProfileMutation, UdpateProfileMutationVariables>;
 
 /**
- * __useChangePhotoMutation__
+ * __useUdpateProfileMutation__
  *
- * To run a mutation, you first call `useChangePhotoMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useChangePhotoMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUdpateProfileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUdpateProfileMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [changePhotoMutation, { data, loading, error }] = useChangePhotoMutation({
+ * const [udpateProfileMutation, { data, loading, error }] = useUdpateProfileMutation({
  *   variables: {
- *      photoUrl: // value for 'photoUrl'
+ *      input: // value for 'input'
  *   },
  * });
  */
-export function useChangePhotoMutation(baseOptions?: Apollo.MutationHookOptions<ChangePhotoMutation, ChangePhotoMutationVariables>) {
+export function useUdpateProfileMutation(baseOptions?: Apollo.MutationHookOptions<UdpateProfileMutation, UdpateProfileMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ChangePhotoMutation, ChangePhotoMutationVariables>(ChangePhotoDocument, options);
+        return Apollo.useMutation<UdpateProfileMutation, UdpateProfileMutationVariables>(UdpateProfileDocument, options);
       }
-export type ChangePhotoMutationHookResult = ReturnType<typeof useChangePhotoMutation>;
-export type ChangePhotoMutationResult = Apollo.MutationResult<ChangePhotoMutation>;
-export type ChangePhotoMutationOptions = Apollo.BaseMutationOptions<ChangePhotoMutation, ChangePhotoMutationVariables>;
+export type UdpateProfileMutationHookResult = ReturnType<typeof useUdpateProfileMutation>;
+export type UdpateProfileMutationResult = Apollo.MutationResult<UdpateProfileMutation>;
+export type UdpateProfileMutationOptions = Apollo.BaseMutationOptions<UdpateProfileMutation, UdpateProfileMutationVariables>;
+export const GetLotDocument = gql`
+    query GetLot($id: Int!) {
+  getLot(id: $id) {
+    title
+    description
+    createdAt
+    creator {
+      username
+      photoUrl
+      phoneNumber
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetLotQuery__
+ *
+ * To run a query within a React component, call `useGetLotQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetLotQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetLotQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetLotQuery(baseOptions: Apollo.QueryHookOptions<GetLotQuery, GetLotQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetLotQuery, GetLotQueryVariables>(GetLotDocument, options);
+      }
+export function useGetLotLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLotQuery, GetLotQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetLotQuery, GetLotQueryVariables>(GetLotDocument, options);
+        }
+export type GetLotQueryHookResult = ReturnType<typeof useGetLotQuery>;
+export type GetLotLazyQueryHookResult = ReturnType<typeof useGetLotLazyQuery>;
+export type GetLotQueryResult = Apollo.QueryResult<GetLotQuery, GetLotQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
     email
     username
     photoUrl
+    phoneNumber
   }
 }
     `;
@@ -459,3 +546,41 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const GetProfileDocument = gql`
+    query GetProfile($username: String!) {
+  getProfile(username: $username) {
+    username
+    email
+    photoUrl
+    phoneNumber
+  }
+}
+    `;
+
+/**
+ * __useGetProfileQuery__
+ *
+ * To run a query within a React component, call `useGetProfileQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetProfileQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetProfileQuery({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useGetProfileQuery(baseOptions: Apollo.QueryHookOptions<GetProfileQuery, GetProfileQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetProfileQuery, GetProfileQueryVariables>(GetProfileDocument, options);
+      }
+export function useGetProfileLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetProfileQuery, GetProfileQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetProfileQuery, GetProfileQueryVariables>(GetProfileDocument, options);
+        }
+export type GetProfileQueryHookResult = ReturnType<typeof useGetProfileQuery>;
+export type GetProfileLazyQueryHookResult = ReturnType<typeof useGetProfileLazyQuery>;
+export type GetProfileQueryResult = Apollo.QueryResult<GetProfileQuery, GetProfileQueryVariables>;

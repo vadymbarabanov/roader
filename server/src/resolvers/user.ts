@@ -4,6 +4,7 @@ import {
     Ctx,
     Field,
     FieldResolver,
+    InputType,
     Mutation,
     ObjectType,
     Query,
@@ -21,6 +22,16 @@ import {
 import { v4 } from 'uuid'
 import { sendEmail } from '../utils/sendEmail'
 import { isAuth } from '../middleware/isAuth'
+import { isObjEmpty } from '../utils/isObjEmpty'
+
+@InputType()
+class ProfileInput {
+    @Field(() => String, { nullable: true })
+    photoUrl?: string
+
+    @Field(() => String, { nullable: true })
+    phoneNumber?: string
+}
 
 @ObjectType()
 class UserResponse {
@@ -256,16 +267,29 @@ export class UserResolver {
         )
     }
 
+    @Query(() => User)
+    async getProfile(
+        @Arg('username') username: string
+    ): Promise<User | undefined> {
+        return await User.findOne({ where: { username } })
+    }
+
     @Mutation(() => Boolean)
     @UseMiddleware(isAuth)
-    async changePhoto(
-        @Arg('photoUrl') photoUrl: string,
+    async updateProfile(
+        @Arg('input') input: ProfileInput,
         @Ctx() { req }: MyContext
     ): Promise<boolean> {
-        if (!photoUrl) {
+        if (isObjEmpty(input)) {
             return false
         }
-        await User.update({ id: req.session.userId }, { photoUrl })
+
+        for (const prop in input) {
+            // @ts-ignore
+            if (!input[prop]) delete input[prop]
+        }
+
+        await User.update({ id: req.session.userId }, { ...input })
         return true
     }
 }

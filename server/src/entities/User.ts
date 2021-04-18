@@ -33,6 +33,10 @@ export class User extends BaseEntity {
     @Column('varchar', { length: 255, nullable: true })
     photoUrl: string
 
+    @Field(() => String, { nullable: true })
+    @Column('varchar', { length: '20', nullable: true })
+    phoneNumber: string
+
     @OneToMany(() => Lot, (lot) => lot.creator)
     lots: Lot[]
 

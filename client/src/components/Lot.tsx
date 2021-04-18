@@ -1,6 +1,7 @@
-import { StarIcon } from '@chakra-ui/icons'
-import { Badge, Box, Image } from '@chakra-ui/react'
+import { Text, Box, Image, Link } from '@chakra-ui/react'
 import React from 'react'
+import NextLink from 'next/link'
+import { ArrowUpIcon } from '@chakra-ui/icons'
 
 export const Lot: React.FC<any> = ({ data }) => {
     // Sample card from Airbnb
@@ -8,12 +9,7 @@ export const Lot: React.FC<any> = ({ data }) => {
     const property = {
         imageUrl: 'https://bit.ly/2Z4KKcF',
         imageAlt: data.title,
-        beds: 3,
-        baths: 2,
-        title: data.title,
-        formattedPrice: '$1,900.00',
-        reviewCount: 0,
-        rating: 4,
+        formattedPrice: data.highestBid,
     }
 
     return (
@@ -27,10 +23,13 @@ export const Lot: React.FC<any> = ({ data }) => {
 
             <Box p="6">
                 <Box>
-                    <Box as="span" color="gray.500">
-                        Bid{' '}
-                    </Box>
-                    {property.formattedPrice}
+                    {data.highestBid ? (
+                        <Text fontSize="lg">
+                            <ArrowUpIcon /> ${data.highestBid}
+                        </Text>
+                    ) : (
+                        <Text fontSize="md">No bids</Text>
+                    )}
                 </Box>
 
                 <Box
@@ -39,8 +38,12 @@ export const Lot: React.FC<any> = ({ data }) => {
                     as="h4"
                     lineHeight="tight"
                     isTruncated>
-                    {property.title}
+                    {data.title}
                 </Box>
+
+                <NextLink href={`/profile/${data.creator.username}`}>
+                    <Link>{data.creator.username}</Link>
+                </NextLink>
             </Box>
         </Box>
     )

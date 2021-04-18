@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from 'type-graphql'
+import { Field, Float, Int, ObjectType } from 'type-graphql'
 import {
     BaseEntity,
     Column,
@@ -30,6 +30,10 @@ export class Lot extends BaseEntity {
     @Field()
     @Column('int')
     creatorId!: number
+
+    @Field(() => Float, { nullable: true })
+    @Column('float', { nullable: true })
+    highestBid: number
 
     @Field(() => [Bid])
     @OneToMany(() => Bid, (bid) => bid.creator)

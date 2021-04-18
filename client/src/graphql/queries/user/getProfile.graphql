@@ -1,0 +1,8 @@
+query GetProfile($username: String!) {
+    getProfile(username: $username) {
+        username
+        email
+        photoUrl
+        phoneNumber
+    }
+}

@@ -2,6 +2,7 @@ query Lots {
     lots {
         id
         title
+        highestBid
         descriptionSnippet
         creator {
             username

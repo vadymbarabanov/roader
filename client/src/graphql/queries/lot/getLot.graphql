@@ -1,0 +1,12 @@
+query GetLot($id: Int!) {
+    getLot(id: $id) {
+        title
+        description
+        createdAt
+        creator {
+            username
+            photoUrl
+            phoneNumber
+        }
+    }
+}

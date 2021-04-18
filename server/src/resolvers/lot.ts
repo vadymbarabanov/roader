@@ -38,7 +38,7 @@ export class LotResolver {
     }
 
     @Query(() => Lot, { nullable: true })
-    async lot(@Arg('id', () => Int) id: number): Promise<Lot | undefined> {
+    async getLot(@Arg('id', () => Int) id: number): Promise<Lot | undefined> {
         return await Lot.findOne(id)
     }
 
